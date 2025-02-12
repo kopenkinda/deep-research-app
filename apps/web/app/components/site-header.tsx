@@ -1,13 +1,10 @@
 import { SidebarIcon } from "lucide-react";
 
-import { SearchForm } from "~/components/search-form";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
@@ -31,17 +28,15 @@ export function SiteHeader() {
         <Breadcrumb className="hidden sm:block">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#">
-                Building Your Application
-              </BreadcrumbLink>
+              <BreadcrumbLink href="#">Home</BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
+            {/* <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-            </BreadcrumbItem>
+            </BreadcrumbItem> */}
           </BreadcrumbList>
         </Breadcrumb>
-        <SearchForm className="w-full sm:ml-auto sm:w-auto" />
+        {/* <SearchForm className="w-full sm:ml-auto sm:w-auto" /> */}
       </div>
     </header>
   );

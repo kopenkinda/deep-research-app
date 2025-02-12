@@ -39,7 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="dark">
+      <body className="dark overflow-hidden">
         <div className="[--header-height:calc(--spacing(14))]">
           <SidebarProvider className="flex flex-col">
             <SiteHeader />
