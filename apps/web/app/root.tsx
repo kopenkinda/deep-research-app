@@ -6,7 +6,9 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
 } from "react-router";
-
+import { AppSidebar } from "~/components/app-sidebar";
+import { SiteHeader } from "~/components/site-header";
+import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 
@@ -37,8 +39,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="bg-amber-50">
-        {children}
+      <body className="dark">
+        <div className="[--header-height:calc(--spacing(14))]">
+          <SidebarProvider className="flex flex-col">
+            <SiteHeader />
+            <div className="flex flex-1">
+              <AppSidebar />
+              <SidebarInset>{children}</SidebarInset>
+            </div>
+          </SidebarProvider>
+        </div>
         <ScrollRestoration />
         <Scripts />
       </body>
