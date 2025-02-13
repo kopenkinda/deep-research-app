@@ -41,7 +41,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Meta />
           <Links />
         </head>
-        <body className="dark overflow-hidden">
+        <body className="dark overscroll-none">
           <div className="[--header-height:calc(--spacing(14))]">
             <SidebarProvider className="flex flex-col">
               <SiteHeader />

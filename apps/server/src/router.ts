@@ -26,8 +26,8 @@ export const appRouter = router({
     .output(zAsyncIterable({ yield: z.number() }))
     .subscription(async function* handler({ ctx }) {
       for (let i = 0; i < 100; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        if (i > 10) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        if (i > 50) {
           return;
         }
         yield i;
