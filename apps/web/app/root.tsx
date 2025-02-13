@@ -11,6 +11,7 @@ import { SiteHeader } from "~/components/site-header";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
+import { TRPCProvider } from "./trpc/react";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -32,27 +33,29 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body className="dark overflow-hidden">
-        <div className="[--header-height:calc(--spacing(14))]">
-          <SidebarProvider className="flex flex-col">
-            <SiteHeader />
-            <div className="flex flex-1">
-              <AppSidebar />
-              <SidebarInset>{children}</SidebarInset>
-            </div>
-          </SidebarProvider>
-        </div>
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
+    <TRPCProvider>
+      <html lang="en">
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <Meta />
+          <Links />
+        </head>
+        <body className="dark overflow-hidden">
+          <div className="[--header-height:calc(--spacing(14))]">
+            <SidebarProvider className="flex flex-col">
+              <SiteHeader />
+              <div className="flex flex-1">
+                <AppSidebar />
+                <SidebarInset>{children}</SidebarInset>
+              </div>
+            </SidebarProvider>
+          </div>
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </html>
+    </TRPCProvider>
   );
 }
 
