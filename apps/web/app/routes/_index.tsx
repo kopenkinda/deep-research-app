@@ -18,6 +18,7 @@ export async function loader() {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const [data, setData] = useState<number[]>([]);
+  const { data: count, isLoading } = trpc.count.useQuery();
   trpc.stream.useSubscription(undefined, {
     onData(data) {
       setData((prev) => [...prev, data]);
@@ -29,6 +30,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   return (
     <div className="p-2">
       <h1>Welcome to the Home Page</h1>
+      {isLoading ? <p>Loading count...</p> : <p>Count: {count}</p>}
       <ul>
         {data.map((item) => (
           <li key={item}>{item}</li>

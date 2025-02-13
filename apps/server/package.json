@@ -4,10 +4,15 @@
 		"dev": "bun run --hot src/index.ts",
 		"lint": "bunx biome check --write .",
 		"test": "bun test",
-		"types": "tsc --noEmit"
+		"types": "tsc --noEmit",
+		"with-env": "dotenv -c --",
+		"drizzle-kit": "bun run with-env drizzle-kit"
 	},
 	"dependencies": {
+		"@libsql/client": "^0.14.0",
+		"@t3-oss/env-core": "^0.12.0",
 		"@trpc/server": "^11.0.0-rc.764",
+		"drizzle-orm": "^0.39.3",
 		"hono": "^4.6.14",
 		"superjson": "^2.2.2",
 		"uuid": "^11.0.3",
@@ -16,6 +21,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@hono/trpc-server": "0.3.4",
-		"@types/bun": "^1.1.14"
+		"@types/bun": "^1.2.2",
+		"dotenv-cli": "^8.0.0",
+		"drizzle-kit": "^0.30.4"
 	}
 }
