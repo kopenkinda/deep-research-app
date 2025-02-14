@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { client } from "~/trpc/client";
-import { trpc } from "~/trpc/react";
 import type { Route } from "./+types/_index";
 
 export function meta({ data }: Route.MetaArgs) {
@@ -10,32 +7,6 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
-export async function loader() {
-  return {
-    data: await client.get.query(),
-  };
-}
-
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const [data, setData] = useState<number[]>([]);
-  const { data: count, isLoading } = trpc.count.useQuery();
-  trpc.stream.useSubscription(undefined, {
-    onData(data) {
-      setData((prev) => [...prev, data]);
-    },
-    onComplete() {
-      console.log("done");
-    },
-  });
-  return (
-    <div className="p-2">
-      <h1>Welcome to the Home Page</h1>
-      {isLoading ? <p>Loading count...</p> : <p>Count: {count}</p>}
-      <ul>
-        {data.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
+  return <div className="p-2">Hi</div>;
 }

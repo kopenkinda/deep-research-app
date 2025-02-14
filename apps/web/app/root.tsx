@@ -6,9 +6,6 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
 } from "react-router";
-import { AppSidebar } from "~/components/app-sidebar";
-import { SiteHeader } from "~/components/site-header";
-import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import { TRPCProvider } from "./trpc/react";
@@ -42,15 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Links />
         </head>
         <body className="dark overscroll-none">
-          <div className="[--header-height:calc(--spacing(14))]">
-            <SidebarProvider className="flex flex-col">
-              <SiteHeader />
-              <div className="flex flex-1">
-                <AppSidebar />
-                <SidebarInset>{children}</SidebarInset>
-              </div>
-            </SidebarProvider>
-          </div>
+          {children}
           <ScrollRestoration />
           <Scripts />
         </body>
