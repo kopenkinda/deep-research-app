@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { publicProcedure, router } from "../utils/trpc";
 
@@ -40,4 +40,20 @@ export const chatRouter = router({
       .orderBy(desc(schemas.researchTable.id));
     return entries;
   }),
+  getChat: publicProcedure
+    .input(z.object({ id: z.number().int() }))
+    .query(async ({ input, ctx }) => {
+      const result = await ctx.db
+        .select()
+        .from(ctx.schemas.researchTable)
+        .where(eq(ctx.schemas.researchTable.id, input.id));
+      const found = result.at(0);
+      if (!found) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Chat not found.",
+        });
+      }
+      return found;
+    }),
 });
