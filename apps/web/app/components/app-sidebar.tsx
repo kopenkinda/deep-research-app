@@ -11,8 +11,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
+import { trpc } from "~/trpc/react";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: projects, isLoading } = trpc.chat.getAllChatMetas.useQuery(
+    undefined,
+    {
+      refetchInterval: false,
+    }
+  );
   return (
     <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
@@ -40,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavProjects projects={[]} />
+        <NavProjects projects={projects ?? []} isLoading={isLoading} />
       </SidebarContent>
     </Sidebar>
   );

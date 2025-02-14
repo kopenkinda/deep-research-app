@@ -17,6 +17,7 @@ type FormInput = z.infer<typeof validation>;
 export default function NewChatPage() {
   const mutation = trpc.chat.initialize.useMutation();
   const navigate = useNavigate();
+  const utils = trpc.useUtils();
 
   const form = useForm<FormInput>({
     defaultValues: {
@@ -31,6 +32,7 @@ export default function NewChatPage() {
     async onSubmit({ value }) {
       console.log("Submit:", value);
       const res = await mutation.mutateAsync(value);
+      await utils.chat.getAllChatMetas.invalidate();
       await navigate(`/chat/${res.id}`);
     },
   });

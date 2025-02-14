@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { desc } from "drizzle-orm";
 import { z } from "zod";
 import { publicProcedure, router } from "../utils/trpc";
 
@@ -29,4 +30,14 @@ export const chatRouter = router({
       }
       return entry;
     }),
+  getAllChatMetas: publicProcedure.query(async ({ ctx: { db, schemas } }) => {
+    const entries = await db
+      .select({
+        id: schemas.researchTable.id,
+        topic: schemas.researchTable.topic,
+      })
+      .from(schemas.researchTable)
+      .orderBy(desc(schemas.researchTable.id));
+    return entries;
+  }),
 });

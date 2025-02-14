@@ -18,11 +18,13 @@ import {
 
 export function NavProjects({
   projects,
+  isLoading,
 }: {
   projects: {
-    name: string;
+    topic: string;
     id: number;
   }[];
+  isLoading: boolean;
 }) {
   const { isMobile } = useSidebar();
 
@@ -30,11 +32,22 @@ export function NavProjects({
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Researches</SidebarGroupLabel>
       <SidebarMenu>
+        {isLoading && (
+          <SidebarMenuItem>
+            {Array.from({ length: 10 }).map((_, i) => (
+              <SidebarMenuButton
+                className="animate-pulse bg-muted h-6 mt-2"
+                // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                key={i}
+              />
+            ))}
+          </SidebarMenuItem>
+        )}
         {projects.map((item) => (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
               <Link to={`/chat/${item.id}`}>
-                <span>{item.name}</span>
+                <span>{item.topic}</span>
               </Link>
             </SidebarMenuButton>
             <DropdownMenu>
