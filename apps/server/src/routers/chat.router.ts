@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { z } from "zod";
+import { getChat } from "../db/lib/get-chat";
+import { eventBus } from "../utils/event-bus";
 import { publicProcedure, router } from "../utils/trpc";
 
 export const chatRouter = router({
@@ -28,6 +30,13 @@ export const chatRouter = router({
           message: "Failed to create chat. Try again later.",
         });
       }
+      const willBeHandled = eventBus.emit("chat:created", { chatId: entry.id });
+      if (!willBeHandled) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create chat. Try again later.",
+        });
+      }
       return entry;
     }),
   getAllChatMetas: publicProcedure.query(async ({ ctx: { db, schemas } }) => {
@@ -43,17 +52,13 @@ export const chatRouter = router({
   getChat: publicProcedure
     .input(z.object({ id: z.number().int() }))
     .query(async ({ input, ctx }) => {
-      const result = await ctx.db
-        .select()
-        .from(ctx.schemas.researchTable)
-        .where(eq(ctx.schemas.researchTable.id, input.id));
-      const found = result.at(0);
-      if (!found) {
+      const chat = getChat(input.id);
+      if (!chat) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Chat not found.",
         });
       }
-      return found;
+      return chat;
     }),
 });

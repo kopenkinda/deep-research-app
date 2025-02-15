@@ -2,6 +2,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createContext } from "./context";
+import { subscribe } from "./events";
 import { appRouter } from "./router";
 
 const app = new Hono();
@@ -16,5 +17,7 @@ app.all("/trpc/*", async (c) => {
     createContext: () => createContext(c),
   });
 });
+
+subscribe();
 
 export default app;
