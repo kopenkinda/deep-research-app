@@ -1,5 +1,5 @@
 import { MoreHorizontalIcon, Trash2Icon } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/ui/sidebar";
+import { trpc } from "~/trpc/react";
 
 export function NavProjects({
   projects,
@@ -27,6 +28,9 @@ export function NavProjects({
   isLoading: boolean;
 }) {
   const { isMobile } = useSidebar();
+  const deleteChatMutation = trpc.chat.deleteChat.useMutation();
+  const utils = trpc.useUtils();
+  const navigate = useNavigate();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -62,7 +66,14 @@ export function NavProjects({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={deleteChatMutation.isPending}
+                  onClick={async () => {
+                    await deleteChatMutation.mutateAsync({ id: item.id });
+                    await utils.chat.getAllChatMetas.invalidate();
+                    await navigate("/chat");
+                  }}
+                >
                   <Trash2Icon className="text-muted-foreground" />
                   <span>Delete Project</span>
                 </DropdownMenuItem>

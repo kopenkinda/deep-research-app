@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { redirect } from "react-router";
 import { ChatFollowupQuestions } from "~/components/chat/followup-questions";
-import { ProgressVisualiser } from "~/components/chat/visualiser";
+import { LoadingBar } from "~/components/ui/loading-bar";
 import { client } from "~/trpc/client";
 import { trpc } from "~/trpc/react";
 import type { Route } from "./+types/_chat.chat.$id";
@@ -20,11 +20,13 @@ export const loader = async ({ params }: Route.LoaderArgs) => {
 
 export default function ChatPage({ loaderData }: Route.ComponentProps) {
   const [chatState, setChatState] = useState(loaderData.chat.state);
-  const { data, isFetching } = trpc.chat.getChat.useQuery(
+  const isGenerating = chatState.includes("generating");
+  console.log(loaderData.chat);
+  const { data } = trpc.chat.getChat.useQuery(
     { id: loaderData.chat.id },
     {
       refetchInterval: 1000,
-      enabled: chatState === "setup",
+      enabled: isGenerating,
     }
   );
 
@@ -36,7 +38,7 @@ export default function ChatPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      {isFetching && <ProgressVisualiser />}
+      {isGenerating && <LoadingBar />}
       {chatState === "follow-up-required" && (
         <ChatFollowupQuestions chatId={loaderData.chat.id} />
       )}

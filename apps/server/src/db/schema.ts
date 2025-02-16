@@ -7,7 +7,13 @@ export const researchTable = sqliteTable("research_table", {
   breadth: int().notNull().default(4),
   width: int().notNull().default(2),
   state: text({
-    enum: ["setup", "follow-up-required", "in-progress", "finished"],
+    enum: [
+      "setup",
+      "generating-followups",
+      "follow-up-required",
+      "generating-research",
+      "finished",
+    ],
   })
     .notNull()
     .default("setup"),

@@ -13,12 +13,12 @@ export function subscribe() {
     }
     const feedback = await generateFeedback({ query: chat.topic });
     if (feedback.length === 0) {
-      await updateChat(chat.id, { state: "in-progress" });
+      await updateChat(chat.id, { state: "generating-followups" });
       return chatEventBus.emit("chat:in-progress", { chatId: chat.id });
     }
     const count = await createFollowups(chat.id, feedback);
     if (count === 0) {
-      await updateChat(chat.id, { state: "in-progress" });
+      await updateChat(chat.id, { state: "generating-research" });
       return chatEventBus.emit("chat:in-progress", { chatId: chat.id });
     }
     await updateChat(chat.id, { state: "follow-up-required" });

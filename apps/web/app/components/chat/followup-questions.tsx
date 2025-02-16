@@ -1,4 +1,10 @@
-import { CheckIcon, SaveIcon, SendIcon, XIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  SaveIcon,
+  SendIcon,
+  XIcon,
+} from "lucide-react";
 import { useId, useState } from "react";
 import { trpc } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/router";
@@ -28,11 +34,21 @@ export function ChatFollowupQuestions({ chatId }: { chatId: number }) {
       </div>
     );
   }
+  const allQuestionsAnswered = data?.every(
+    (question) => question.answer !== null
+  );
   return (
     <div className="flex flex-col gap-4">
       {data?.map((question) => (
         <FollowUpQuestionForm key={question.id} question={question} />
       ))}
+      {allQuestionsAnswered && (
+        <div className="flex items-center justify-end w-full">
+          <Button className="ml-auto">
+            Continue <ArrowRightIcon />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { deleteChat } from "../db/lib/delete-chat";
 import { getChat } from "../db/lib/get-chat";
 import { getFollowups } from "../db/lib/get-followups";
 import { chatEventBus } from "../events/chat-event-bus";
@@ -72,5 +73,10 @@ export const chatRouter = router({
         .update(schemas.followUpsTable)
         .set({ answer: input.answer })
         .where(eq(schemas.followUpsTable.id, input.id));
+    }),
+  deleteChat: publicProcedure
+    .input(z.object({ id: z.number().int() }))
+    .mutation(async ({ input }) => {
+      return await deleteChat(input.id);
     }),
 });
