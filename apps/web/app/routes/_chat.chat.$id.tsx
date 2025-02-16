@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { redirect } from "react-router";
 import { ChatFollowupQuestions } from "~/components/chat/followup-questions";
-import { LoadingBar } from "~/components/ui/loading-bar";
 import { client } from "~/trpc/client";
 import { trpc } from "~/trpc/react";
 import type { Route } from "./+types/_chat.chat.$id";
@@ -38,9 +37,12 @@ export default function ChatPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      {isGenerating && <LoadingBar />}
-      {chatState === "follow-up-required" && (
-        <ChatFollowupQuestions chatId={loaderData.chat.id} />
+      {(chatState === "follow-up-required" ||
+        chatState === "generating-followups") && (
+        <ChatFollowupQuestions
+          chatId={loaderData.chat.id}
+          isLoading={chatState === "generating-followups"}
+        />
       )}
     </>
   );

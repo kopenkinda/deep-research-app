@@ -8,14 +8,20 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Skeleton } from "../ui/skeleton";
 
-export function ChatFollowupQuestions({ chatId }: { chatId: number }) {
-  const { data, isLoading } = trpc.chat.getFollowups.useQuery(
+export function ChatFollowupQuestions({
+  chatId,
+  isLoading,
+}: {
+  chatId: number;
+  isLoading: boolean;
+}) {
+  const { data, isLoading: followupsLoading } = trpc.chat.getFollowups.useQuery(
     { id: chatId },
     {
-      refetchInterval: false,
+      refetchInterval: isLoading ? 1000 : false,
     }
   );
-  if (isLoading) {
+  if (isLoading || followupsLoading) {
     return (
       <div className="flex flex-col gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
