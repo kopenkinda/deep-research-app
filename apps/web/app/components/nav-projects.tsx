@@ -47,6 +47,13 @@ export function NavProjects({
             ))}
           </SidebarMenuItem>
         )}
+        {projects.length === 0 && !isLoading && (
+          <SidebarMenuItem>
+            <SidebarMenuButton className="text-muted-foreground" disabled>
+              You'll see your researches here
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
         {projects.map((item) => (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
@@ -67,6 +74,7 @@ export function NavProjects({
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuItem
+                  variant="destructive"
                   disabled={deleteChatMutation.isPending}
                   onClick={async () => {
                     await deleteChatMutation.mutateAsync({ id: item.id });
