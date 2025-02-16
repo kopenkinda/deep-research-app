@@ -31,14 +31,14 @@ export const links: Route.LinksFunction = () => [
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <TRPCProvider>
-      <html lang="en">
+      <html lang="en" className="dark">
         <head>
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <Meta />
           <Links />
         </head>
-        <body className="dark overscroll-none">
+        <body className="overscroll-none">
           {children}
           <ScrollRestoration />
           <Scripts />

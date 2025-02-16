@@ -9,6 +9,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { useSidebar } from "~/components/ui/sidebar";
+import { ThemeToggle } from "./theme-toggle";
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();
@@ -36,6 +37,9 @@ export function SiteHeader() {
             </BreadcrumbItem> */}
           </BreadcrumbList>
         </Breadcrumb>
+        <div className="ml-auto">
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );
