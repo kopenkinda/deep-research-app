@@ -5,11 +5,12 @@ export const researchTable = sqliteTable("research_table", {
   id: int().primaryKey({ autoIncrement: true }),
   topic: text().notNull(),
   breadth: int().notNull().default(4),
-  width: int().notNull().default(2),
+  depth: int().notNull().default(2),
   state: text({
     enum: [
       "generating-followups",
       "follow-up-required",
+      "awaiting-research",
       "generating-research",
       "finished",
     ],
@@ -49,9 +50,41 @@ export const followUpToResearchRelation = relations(
   })
 );
 
+export const researchDocumentTable = sqliteTable("research_document", {
+  id: int().primaryKey({ autoIncrement: true }),
+  researchId: int("research_id").notNull(),
+  serp: text().notNull(),
+  document: text().notNull(),
+  depth: int().notNull(),
+  breadth: int().notNull(),
+  createdAt: int({ mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(cast((julianday('now') - 2440587.5)*86400000 as integer))`),
+});
+
+export const researchDocumentToResearchRelation = relations(
+  researchDocumentTable,
+  ({ one }) => ({
+    research: one(researchTable, {
+      fields: [researchDocumentTable.researchId],
+      references: [researchTable.id],
+    }),
+  })
+);
+
+export const researchToResearchDocumentRelation = relations(
+  researchTable,
+  ({ many }) => ({
+    documents: many(researchDocumentTable),
+  })
+);
+
 export const schemas = {
   researchTable,
   followUpsTable,
+  researchDocumentTable,
   followUpToResearchRelation,
   researchToFollowUpsRelation,
+  researchDocumentToResearchRelation,
+  researchToResearchDocumentRelation,
 };

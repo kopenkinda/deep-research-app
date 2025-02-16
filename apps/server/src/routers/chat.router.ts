@@ -4,7 +4,7 @@ import { z } from "zod";
 import { deleteChat } from "../db/lib/delete-chat";
 import { getChat } from "../db/lib/get-chat";
 import { getFollowups } from "../db/lib/get-followups";
-import { chatEventBus } from "../events/chat-event-bus";
+import { chatEventBus, emit } from "../events/chat-event-bus";
 import { publicProcedure, router } from "../utils/trpc";
 
 export const chatRouter = router({
@@ -13,7 +13,7 @@ export const chatRouter = router({
       z.object({
         topic: z.string().nonempty().endsWith("?"),
         breadth: z.number().int().positive().min(1).max(10).optional(),
-        width: z.number().int().positive().min(1).max(10).optional(),
+        depth: z.number().int().positive().min(1).max(10).optional(),
       })
     )
     .mutation(async ({ ctx: { db, schemas }, input }) => {
@@ -22,7 +22,7 @@ export const chatRouter = router({
         .values({
           topic: input.topic,
           breadth: input.breadth,
-          width: input.width,
+          depth: input.depth,
         })
         .returning();
       const entry = result.at(0);
@@ -78,5 +78,34 @@ export const chatRouter = router({
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ input }) => {
       return await deleteChat(input.id);
+    }),
+  startResearch: publicProcedure
+    .input(z.object({ id: z.number().int() }))
+    .mutation(async ({ input }) => {
+      const chat = await getChat(input.id);
+      if (!chat) {
+        return;
+      }
+      if (chat.state !== "awaiting-research") {
+        return;
+      }
+      emit("chat:start-research", {
+        chatId: input.id,
+      });
+    }),
+  generate: publicProcedure
+    .input(z.object({ id: z.number().int() }))
+    .subscription(async function* ({ ctx, input }) {
+      const chat = await getChat(input.id);
+      if (!chat) {
+        return;
+      }
+      if (chat.state !== "generating-research") {
+        return;
+      }
+      let i = 0;
+      while (true) {
+        yield i++;
+      }
     }),
 });

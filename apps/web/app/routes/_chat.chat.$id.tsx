@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { skipToken } from "@tanstack/react-query";
 import { redirect } from "react-router";
 import { ChatFollowupQuestions } from "~/components/chat/followup-questions";
+import { useChatState } from "~/hooks/use-chat-state";
+import { useResearchSubscription } from "~/hooks/use-research-subscription";
 import { client } from "~/trpc/client";
-import { trpc } from "~/trpc/react";
 import type { Route } from "./+types/_chat.chat.$id";
 
 export const loader = async ({ params }: Route.LoaderArgs) => {
@@ -18,22 +19,24 @@ export const loader = async ({ params }: Route.LoaderArgs) => {
 };
 
 export default function ChatPage({ loaderData }: Route.ComponentProps) {
-  const [chatState, setChatState] = useState(loaderData.chat.state);
-  const isGenerating = chatState.includes("generating");
-  console.log(loaderData.chat);
-  const { data } = trpc.chat.getChat.useQuery(
-    { id: loaderData.chat.id },
-    {
-      refetchInterval: 1000,
-      enabled: isGenerating,
-    }
+  const [chatState, refetchState] = useChatState(
+    loaderData.chat.id,
+    loaderData.chat.state
   );
 
-  useEffect(() => {
-    if (data !== undefined) {
-      setChatState(data.state);
+  useResearchSubscription(
+    chatState === "generating-research"
+      ? { id: loaderData.chat.id }
+      : skipToken,
+    {
+      onData(data) {
+        console.log(data);
+      },
+      onComplete() {
+        console.log("completed");
+      },
     }
-  }, [data]);
+  );
 
   return (
     <>

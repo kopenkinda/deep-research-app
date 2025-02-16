@@ -9,7 +9,7 @@ import { trpc } from "~/trpc/react";
 const validation = z.object({
   topic: z.string().nonempty().endsWith("?"),
   breadth: z.number().int().positive().min(1).max(10),
-  width: z.number().int().positive().min(1).max(10),
+  depth: z.number().int().positive().min(1).max(10),
 });
 
 type FormInput = z.infer<typeof validation>;
@@ -23,7 +23,7 @@ export default function NewChatPage() {
     defaultValues: {
       topic: "",
       breadth: 4,
-      width: 2,
+      depth: 2,
     },
     validators: {
       onChange: validation,
@@ -81,11 +81,11 @@ export default function NewChatPage() {
                   </div>
                 )}
               </form.Field>
-              <form.Field name="width">
+              <form.Field name="depth">
                 {(field) => (
                   <div className="flex-1 flex items-center gap-2">
                     <span className="text-sm text-muted-foreground whitespace-nowrap">
-                      Width: {field.state.value}
+                      Depth: {field.state.value}
                     </span>
                     <Slider
                       className="flex-grow"

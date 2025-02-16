@@ -8,6 +8,7 @@ export type ExplicitChatUpdates = {
 
 export type ChatEventBusEvents = {
   readonly "chat:created": [ChatRelatedEventBase];
+  readonly "chat:start-research": [ChatRelatedEventBase];
   readonly "chat:in-progress": [ChatRelatedEventBase];
   readonly "chat:updated": [ChatRelatedEventBase & ExplicitChatUpdates];
 };
