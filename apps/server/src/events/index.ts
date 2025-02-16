@@ -13,7 +13,7 @@ export function subscribe() {
     }
     const feedback = await generateFeedback({ query: chat.topic });
     if (feedback.length === 0) {
-      await updateChat(chat.id, { state: "generating-followups" });
+      await updateChat(chat.id, { state: "generating-research" });
       return chatEventBus.emit("chat:in-progress", { chatId: chat.id });
     }
     const count = await createFollowups(chat.id, feedback);

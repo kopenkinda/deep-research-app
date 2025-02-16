@@ -1,11 +1,5 @@
-import {
-  ArrowRightIcon,
-  CheckIcon,
-  SaveIcon,
-  SendIcon,
-  XIcon,
-} from "lucide-react";
-import { useId, useState } from "react";
+import { ArrowRightIcon, CheckIcon, SaveIcon, XIcon } from "lucide-react";
+import { useState } from "react";
 import { trpc } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/router";
 import { Badge } from "../ui/badge";

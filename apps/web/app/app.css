@@ -17,13 +17,13 @@
 	--animate-indeterminate-loader: indeterminate 1.5s infinite ease-in-out;
 	@keyframes indeterminate {
 		0% {
-			left: "-25%";
+			left: -25%;
 		}
 		50% {
-			left: "100%";
+			left: 100%;
 		}
 		100% {
-			left: "100%";
+			left: 100%;
 		}
 	}
 }

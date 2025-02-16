@@ -8,7 +8,6 @@ export const researchTable = sqliteTable("research_table", {
   width: int().notNull().default(2),
   state: text({
     enum: [
-      "setup",
       "generating-followups",
       "follow-up-required",
       "generating-research",
@@ -16,7 +15,7 @@ export const researchTable = sqliteTable("research_table", {
     ],
   })
     .notNull()
-    .default("setup"),
+    .default("generating-followups"),
   createdAt: int({ mode: "timestamp_ms" })
     .notNull()
     .default(sql`(cast((julianday('now') - 2440587.5)*86400000 as integer))`),
