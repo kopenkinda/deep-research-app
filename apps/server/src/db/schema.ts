@@ -27,6 +27,7 @@ export const followUpsTable = sqliteTable("follow_ups_table", {
   id: int().primaryKey({ autoIncrement: true }),
   question: text().notNull(),
   answer: text(),
+  placeholder: text().notNull(),
   researchId: int("research_id").notNull(),
   createdAt: int({ mode: "timestamp_ms" })
     .notNull()
