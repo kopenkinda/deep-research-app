@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getChat } from "../db/lib/get-chat";
 import { getFollowups } from "../db/lib/get-followups";
@@ -63,5 +63,14 @@ export const chatRouter = router({
     .query(async ({ input }) => {
       const followups = getFollowups(input.id);
       return followups;
+    }),
+  setFollowupAnswer: publicProcedure
+    .input(z.object({ id: z.number().int(), answer: z.string().nonempty() }))
+    .mutation(async ({ input, ctx }) => {
+      const { db, schemas } = ctx;
+      return await db
+        .update(schemas.followUpsTable)
+        .set({ answer: input.answer })
+        .where(eq(schemas.followUpsTable.id, input.id));
     }),
 });
