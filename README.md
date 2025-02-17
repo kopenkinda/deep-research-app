@@ -50,7 +50,13 @@ OPENAI_MODEL="gpt-4o-mini"   # OpenAI model to use
 FIRECRAWL_KEY=""            # Your Firecrawl API key
 ```
 
-3. Development:
+3. Database Setup:
+```bash
+cd apps/server
+bun run drizzle-kit push
+```
+
+4. Development:
 ```bash
 # Start all services
 bun run dev
