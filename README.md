@@ -90,3 +90,6 @@ bun run drizzle-kit # For database migrations
 bun run studio      # For database management UI
 ```
 
+
+> [!NOTE]
+> "Inspired" by https://github.com/dzhng/deep-research
