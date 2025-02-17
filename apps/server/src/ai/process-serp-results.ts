@@ -19,6 +19,7 @@ export async function processSerpResults(
         processSerpResult({
           query: result.query,
           goal: result.goal,
+          tempId: result.tempId,
           result: {
             success: true,
             data: result.results,
@@ -35,11 +36,13 @@ export async function processSerpResult({
   query,
   goal,
   result,
+  tempId,
   numLearnings = 3,
   numFollowUpQuestions = 3,
 }: {
   query: string;
   goal: string;
+  tempId: string;
   result: SearchResponse;
   numLearnings?: number;
   numFollowUpQuestions?: number;
@@ -69,5 +72,5 @@ export async function processSerpResult({
     }),
   });
 
-  return { result: res.object, query, goal };
+  return { result: res.object, query, goal, tempId };
 }

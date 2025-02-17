@@ -4,6 +4,7 @@ import { ResearchDocuments } from "~/components/chat/research-documents";
 import { useChatState } from "~/hooks/use-chat-state";
 import { client } from "~/trpc/client";
 import type { Route } from "./+types/_chat.chat.$id";
+import Markdown from "react-markdown";
 
 export const loader = async ({ params }: Route.LoaderArgs) => {
   const chatId = +params.id;
@@ -18,7 +19,7 @@ export const loader = async ({ params }: Route.LoaderArgs) => {
 };
 
 export default function ChatPage({ loaderData }: Route.ComponentProps) {
-  const [chatState, refetchState] = useChatState(
+  const [{ chatState, analysis }, refetchState] = useChatState(
     loaderData.chat.id,
     loaderData.chat.state
   );
@@ -37,6 +38,11 @@ export default function ChatPage({ loaderData }: Route.ComponentProps) {
         />
       )}
       <ResearchDocuments chatId={loaderData.chat.id} chatState={chatState} />
+      {analysis !== undefined && (
+        <Markdown className="prose dark:prose-invert prose-sm mt-8">
+          {analysis}
+        </Markdown>
+      )}
     </>
   );
 }

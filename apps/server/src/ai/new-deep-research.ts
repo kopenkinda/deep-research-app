@@ -23,6 +23,11 @@ export type DeepResearchStep =
   | {
       type: "document:visit-failed";
       tempId: string;
+    }
+  | {
+      type: "document:learnt";
+      tempId: string;
+      learnings: string[];
     };
 
 export type DeepResearchParameters = {
@@ -88,6 +93,11 @@ export async function* deepResearch(
   );
 
   for (const learnings of newLearnings) {
+    yield {
+      tempId: learnings.tempId,
+      type: "document:learnt",
+      learnings: learnings.result.learnings,
+    };
     yield* deepResearch({
       breadth: newBreadth,
       depth: newDepth,

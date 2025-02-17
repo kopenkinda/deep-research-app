@@ -1,6 +1,5 @@
 import { relations, sql } from "drizzle-orm";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { status } from "../types";
 
 // #region tables
 export const researchTable = sqliteTable("research_table", {
@@ -19,6 +18,7 @@ export const researchTable = sqliteTable("research_table", {
   })
     .notNull()
     .default("generating-followups"),
+  analysis: text(),
   createdAt: int({ mode: "timestamp_ms" })
     .notNull()
     .default(sql`(cast((julianday('now') - 2440587.5)*86400000 as integer))`),
@@ -44,9 +44,12 @@ export const researchDocumentTable = sqliteTable("research_document", {
   breadth: int().notNull(),
   status: text({
     enum: ["pending", "success", "error"],
-  }).default("pending"),
+  })
+    .notNull()
+    .default("pending"),
   document: text(),
   url: text(),
+  learnings: text().notNull().default("[]"),
   createdAt: int({ mode: "timestamp_ms" })
     .notNull()
     .default(sql`(cast((julianday('now') - 2440587.5)*86400000 as integer))`),

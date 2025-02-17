@@ -1,9 +1,11 @@
 import { generateFeedback } from "../ai/generate-followups";
+import { writeFinalReport } from "../ai/generate-report";
 import { deepResearch } from "../ai/new-deep-research";
 import { createFollowups } from "../db/lib/create-followups";
 import { createResearchDocument } from "../db/lib/create-research-document";
 import { getChat } from "../db/lib/get-chat";
 import { getFollowups } from "../db/lib/get-followups";
+import { getResearchDocuments } from "../db/lib/get-research-documents";
 import { updateChat } from "../db/lib/update-chat";
 import { updateResearchDocument } from "../db/lib/update-research-document";
 import { chatEventBus, emit } from "./chat-event-bus";
@@ -69,8 +71,30 @@ export function subscribe() {
           });
           break;
         }
+        case "document:learnt": {
+          await updateResearchDocument(ids[res.tempId], {
+            status: "success",
+            learnings: JSON.stringify(res.learnings),
+          });
+          break;
+        }
       }
     }
     await updateChat(chat.id, { state: "finished" });
+    emit("chat:research-finished", { chatId: chat.id });
+  });
+
+  chatEventBus.on("chat:research-finished", async (data) => {
+    const chat = await getChat(data.chatId)!;
+    if (!chat) return;
+    const documents = await getResearchDocuments(chat.id);
+    const filteredDocs = documents.filter((d) => d.status === "success");
+    const report = await writeFinalReport({
+      prompt: chat.topic,
+      learnings: filteredDocs.flatMap(
+        (doc) => JSON.parse(doc.learnings) as string[]
+      ),
+    });
+    await updateChat(chat.id, { analysis: report });
   });
 }

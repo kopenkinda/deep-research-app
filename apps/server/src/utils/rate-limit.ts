@@ -4,35 +4,38 @@ export function rateLimit<T extends (...args: any) => any>(
   period: number
 ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
   let callsLeft = maxCallsPerPeriod;
-  let timeout: NodeJS.Timeout | Timer | null = null;
+  let windowStart = Date.now();
+  let waitingPromise: Promise<void> | null = null;
 
-  const refill = () => {
+  const reset = () => {
     callsLeft = maxCallsPerPeriod;
+    windowStart = Date.now();
+    waitingPromise = null;
   };
 
   return async (...args: Parameters<T>): Promise<ReturnType<T>> => {
-    if (callsLeft <= 0) {
-      if (!timeout) {
-        console.log(
-          `Rate limit exceeded, next allowable call in ${
-            period - (Date.now() % period)
-          } ms`
-        );
-        await new Promise<void>((resolve) => {
-          timeout = setTimeout(() => {
-            refill();
-            resolve();
-            timeout = null;
-          }, period - (Date.now() % period)); // this ensures we wait until the end of the period
-        });
-      } else {
-        await new Promise<void>((resolve) =>
-          setTimeout(resolve, period - (Date.now() % period))
-        );
-      }
+    const now = Date.now();
+
+    // Check if we need to reset the window
+    if (now - windowStart >= period) {
+      reset();
     }
 
-    callsLeft--; // Decrement the count of available calls
+    // If we're out of calls, wait for the current window to expire
+    if (callsLeft <= 0) {
+      if (!waitingPromise) {
+        const timeToWait = period - (now - windowStart);
+        waitingPromise = new Promise<void>((resolve) =>
+          setTimeout(() => {
+            reset();
+            resolve();
+          }, timeToWait)
+        );
+      }
+      await waitingPromise;
+    }
+
+    callsLeft--;
     console.log(
       `Function call allowed. ${callsLeft} calls remaining before limit.`
     );

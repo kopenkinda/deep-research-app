@@ -11,6 +11,7 @@ export type ChatEventBusEvents = {
   readonly "chat:start-research": [ChatRelatedEventBase];
   readonly "chat:in-progress": [ChatRelatedEventBase];
   readonly "chat:updated": [ChatRelatedEventBase & ExplicitChatUpdates];
+  readonly "chat:research-finished": [ChatRelatedEventBase];
 };
 
 export const chatEventBus = new EventEmitter<ChatEventBusEvents>({
