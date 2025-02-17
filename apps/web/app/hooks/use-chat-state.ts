@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { trpc } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/router";
 
-type ChatState = NonNullable<RouterOutputs["chat"]["getChat"]>["state"];
+export type ChatState = NonNullable<RouterOutputs["chat"]["getChat"]>["state"];
 
-export function useChatState(chatId: number, defaultState: ChatState) {
-  const [chatState, setChatState] = useState(defaultState);
+export function useChatState(chatId: number, initialState: ChatState) {
+  const [chatState, setChatState] = useState(initialState);
 
   const { data, refetch } = trpc.chat.getChat.useQuery(
     { id: chatId },

@@ -11,9 +11,13 @@ import { Skeleton } from "../ui/skeleton";
 export function ChatFollowupQuestions({
   chatId,
   isLoading,
+  isReadyToStart,
+  refetchState,
 }: {
   chatId: number;
   isLoading: boolean;
+  isReadyToStart: boolean;
+  refetchState: () => Promise<void>;
 }) {
   const { data, isLoading: followupsLoading } = trpc.chat.getFollowups.useQuery(
     { id: chatId },
@@ -21,6 +25,7 @@ export function ChatFollowupQuestions({
       refetchInterval: isLoading ? 1000 : false,
     }
   );
+  const mutation = trpc.chat.startResearch.useMutation();
   if (isLoading || followupsLoading) {
     return (
       <div className="flex flex-col gap-4">
@@ -42,9 +47,15 @@ export function ChatFollowupQuestions({
       {data?.map((question) => (
         <FollowUpQuestionForm key={question.id} question={question} />
       ))}
-      {allQuestionsAnswered && (
+      {allQuestionsAnswered && isReadyToStart && (
         <div className="flex items-center justify-end w-full">
-          <Button className="ml-auto">
+          <Button
+            className="ml-auto"
+            onClick={async () => {
+              await mutation.mutateAsync({ id: chatId });
+              await refetchState();
+            }}
+          >
             Continue <ArrowRightIcon />
           </Button>
         </div>

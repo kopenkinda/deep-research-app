@@ -1,8 +1,7 @@
-import { skipToken } from "@tanstack/react-query";
 import { redirect } from "react-router";
 import { ChatFollowupQuestions } from "~/components/chat/followup-questions";
+import { ResearchDocuments } from "~/components/chat/research-documents";
 import { useChatState } from "~/hooks/use-chat-state";
-import { useResearchSubscription } from "~/hooks/use-research-subscription";
 import { client } from "~/trpc/client";
 import type { Route } from "./+types/_chat.chat.$id";
 
@@ -23,30 +22,21 @@ export default function ChatPage({ loaderData }: Route.ComponentProps) {
     loaderData.chat.id,
     loaderData.chat.state
   );
-
-  useResearchSubscription(
-    chatState === "generating-research"
-      ? { id: loaderData.chat.id }
-      : skipToken,
-    {
-      onData(data) {
-        console.log(data);
-      },
-      onComplete() {
-        console.log("completed");
-      },
-    }
-  );
-
   return (
     <>
       {(chatState === "follow-up-required" ||
-        chatState === "generating-followups") && (
+        chatState === "generating-followups" ||
+        chatState === "awaiting-research") && (
         <ChatFollowupQuestions
           chatId={loaderData.chat.id}
           isLoading={chatState === "generating-followups"}
+          isReadyToStart={chatState === "awaiting-research"}
+          refetchState={async () => {
+            await refetchState();
+          }}
         />
       )}
+      <ResearchDocuments chatId={loaderData.chat.id} chatState={chatState} />
     </>
   );
 }

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { deleteChat } from "../db/lib/delete-chat";
 import { getChat } from "../db/lib/get-chat";
 import { getFollowups } from "../db/lib/get-followups";
+import { updateChat } from "../db/lib/update-chat";
 import { chatEventBus, emit } from "../events/chat-event-bus";
 import { publicProcedure, router } from "../utils/trpc";
 
@@ -69,10 +70,15 @@ export const chatRouter = router({
     .input(z.object({ id: z.number().int(), answer: z.string().nonempty() }))
     .mutation(async ({ input, ctx }) => {
       const { db, schemas } = ctx;
-      return await db
+      await db
         .update(schemas.followUpsTable)
         .set({ answer: input.answer })
         .where(eq(schemas.followUpsTable.id, input.id));
+      const followups = await getFollowups(input.id);
+      const allAnswered = followups.every((f) => f.answer !== null);
+      if (allAnswered) {
+        await updateChat(input.id, { state: "awaiting-research" });
+      }
     }),
   deleteChat: publicProcedure
     .input(z.object({ id: z.number().int() }))
@@ -89,23 +95,9 @@ export const chatRouter = router({
       if (chat.state !== "awaiting-research") {
         return;
       }
+      await updateChat(chat.id, { state: "generating-research" });
       emit("chat:start-research", {
         chatId: input.id,
       });
-    }),
-  generate: publicProcedure
-    .input(z.object({ id: z.number().int() }))
-    .subscription(async function* ({ ctx, input }) {
-      const chat = await getChat(input.id);
-      if (!chat) {
-        return;
-      }
-      if (chat.state !== "generating-research") {
-        return;
-      }
-      let i = 0;
-      while (true) {
-        yield i++;
-      }
     }),
 });

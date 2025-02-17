@@ -4,6 +4,7 @@
 		"moduleResolution": "bundler",
 		"module": "Preserve",
 		"jsx": "react-jsx",
-		"jsxImportSource": "hono/jsx"
+		"jsxImportSource": "hono/jsx",
+		"target": "ESNext"
 	}
 }
