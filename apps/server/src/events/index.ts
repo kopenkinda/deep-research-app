@@ -33,6 +33,7 @@ export function subscribe() {
     if (!chat) {
       return;
     }
+    console.log("DeepResearch for chat", chat.id, "started");
     const followUps = await getFollowups(chat.id);
     await updateChat(chat.id, { state: "generating-research" });
     const ids: Record<string, number> = {};
@@ -42,7 +43,7 @@ export function subscribe() {
       followUps,
       query: chat.topic,
     })) {
-      console.log("DeepResearch", res);
+      console.log("DeepResearch", res.type);
       switch (res.type) {
         case "document:query": {
           const [document] = await createResearchDocument(chat.id, {
@@ -51,11 +52,11 @@ export function subscribe() {
             goal: res.goal,
             serp: res.query,
           });
-          ids[res.id] = document.id;
+          ids[res.tempId] = document.id;
           break;
         }
         case "document:visit": {
-          await updateResearchDocument(ids[res.id], {
+          await updateResearchDocument(ids[res.tempId], {
             status: "success",
             document: res.result,
             url: res.url,
@@ -63,7 +64,7 @@ export function subscribe() {
           break;
         }
         case "document:visit-failed": {
-          await updateResearchDocument(ids[res.id], {
+          await updateResearchDocument(ids[res.tempId], {
             status: "error",
           });
           break;

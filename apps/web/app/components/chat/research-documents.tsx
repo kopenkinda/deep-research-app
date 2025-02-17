@@ -1,8 +1,19 @@
-import { LinkIcon, Loader2Icon, PackageIcon, XIcon } from "lucide-react";
+import { AlertCircleIcon, FileTextIcon, Loader2Icon } from "lucide-react";
+import { useState } from "react";
+import Markdown from "react-markdown";
+import { Card, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "~/components/ui/drawer";
 import type { ChatState } from "~/hooks/use-chat-state";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/router";
+import { ScrollArea } from "../ui/scroll-area";
 
 export function ResearchDocuments({
   chatId,
@@ -22,41 +33,90 @@ export function ResearchDocuments({
     return <div>Loading...</div>;
   }
   return (
-    <div className="grid grid-cols-3 gap-2">
-      {data?.map((doc) => (
-        <Document key={doc.id} doc={doc} />
-      ))}
-    </div>
+    <DocumentGrid documents={data ?? []} />
+    // <div className="grid grid-cols-3 gap-2">
+    //   {data?.map((doc) => (
+    //     <Document key={doc.id} doc={doc} />
+    //   ))}
+    // </div>
   );
 }
 
-function Document({
-  doc,
-}: {
-  doc: RouterOutputs["researchDocument"]["getRelated"][number];
-}) {
+type DocumentEntry = RouterOutputs["researchDocument"]["getRelated"][number];
+
+type DocumentGridProps = {
+  documents: DocumentEntry[];
+};
+
+export default function DocumentGrid({ documents }: DocumentGridProps) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] =
+    useState<DocumentEntry | null>(null);
+
+  const handleCardClick = (document: DocumentEntry) => {
+    if (document.status === "success") {
+      setSelectedDocument(document);
+      setIsDrawerOpen(true);
+    }
+  };
+
+  const getStatusIcon = (status: DocumentEntry["status"]) => {
+    switch (status) {
+      case "success":
+        return <FileTextIcon className="size-4 text-lime-500" />;
+      case "error":
+        return <AlertCircleIcon className="size-4 text-red-600" />;
+      case "pending":
+      default:
+        return <Loader2Icon className="size-4 animate-spin" />;
+    }
+  };
+
   return (
-    <div className="flex items-center gap-2 hover:bg-slate-200/10 pl-2 pr-4 rounded-lg">
-      <div
-        className={cn(
-          "text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg my-2",
-          {
-            "bg-slate-500": doc.status === "pending",
-            "bg-lime-500": doc.status === "success",
-            "bg-red-500": doc.status === "error",
-          }
-        )}
+    <div className="container mx-auto px-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {documents.map((doc) => (
+          <Card
+            key={doc.id}
+            className={cn({
+              "cursor-pointer hover:bg-foreground/10": doc.status === "success",
+            })}
+            onClick={() => handleCardClick(doc)}
+          >
+            <CardHeader className="grid grid-cols-[theme('spacing.6')_auto] items-center p-4">
+              {getStatusIcon(doc.status)}
+              <CardTitle className="text-sm font-medium truncate">
+                {doc.serp}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+
+      <Drawer
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+        direction="right"
       >
-        <PackageIcon className="size-4" />
-      </div>
-      <div className="grid flex-1 text-left text-sm leading-tight">
-        <span className="">{doc.serp}</span>
-      </div>
-      {doc.status === "pending" && (
-        <Loader2Icon className="animate-spin" size={16} />
-      )}
-      {doc.status === "success" && <LinkIcon size={16} />}
-      {doc.status === "error" && <XIcon size={16} />}
+        <DrawerContent>
+          <ScrollArea className="h-full">
+            <DrawerHeader>
+              <DrawerTitle>Document {selectedDocument?.id}</DrawerTitle>
+              <DrawerDescription>
+                Created on {selectedDocument?.createdAt.toLocaleDateString()}
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4 pb-0">
+              <h3 className="font-semibold mb-2">Goal:</h3>
+              <p className="mb-4">{selectedDocument?.goal}</p>
+              <h3 className="font-semibold mb-2">Content:</h3>
+              <Markdown className="prose prose-lime dark:prose-invert">
+                {selectedDocument?.document}
+              </Markdown>
+            </div>
+          </ScrollArea>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

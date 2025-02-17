@@ -1,5 +1,5 @@
 import { ArrowRightIcon, CheckIcon, SaveIcon, XIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/router";
 import { Badge } from "../ui/badge";
@@ -26,6 +26,17 @@ export function ChatFollowupQuestions({
     }
   );
   const mutation = trpc.chat.startResearch.useMutation();
+
+  const allQuestionsAnswered = data?.every(
+    (question) => question.answer !== null
+  );
+
+  useEffect(() => {
+    if (allQuestionsAnswered) {
+      refetchState();
+    }
+  }, [allQuestionsAnswered]);
+
   if (isLoading || followupsLoading) {
     return (
       <div className="flex flex-col gap-4">
@@ -39,9 +50,6 @@ export function ChatFollowupQuestions({
       </div>
     );
   }
-  const allQuestionsAnswered = data?.every(
-    (question) => question.answer !== null
-  );
   return (
     <div className="flex flex-col gap-4">
       {data?.map((question) => (
@@ -81,6 +89,7 @@ function FollowUpQuestionForm({
         await mutation.mutateAsync({
           answer,
           id: question.id,
+          chatId: question.researchId,
         });
         await utils.chat.getFollowups.invalidate({ id: question.researchId });
       }}

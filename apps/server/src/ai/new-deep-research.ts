@@ -1,17 +1,14 @@
-import pLimit from "p-limit";
 import { v4 } from "uuid";
 import type { FollowUpQuestionGenerationResult } from "./generate-followups";
 import { generateSerpQueries } from "./generate-serp-queries";
 import { processSerpResults } from "./process-serp-results";
 import { searchBasedOnQueries } from "./search-serp-query";
-
-const CONCURRENCY_LIMIT = 2;
-const limit = pLimit(CONCURRENCY_LIMIT);
+import { nextQuery } from "./prompts/next-query-prompt";
 
 export type DeepResearchStep =
   | {
       type: "document:query";
-      id: string;
+      tempId: string;
       breadth: number;
       depth: number;
       query: string;
@@ -19,13 +16,13 @@ export type DeepResearchStep =
     }
   | {
       type: "document:visit";
-      id: string;
+      tempId: string;
       url: string;
       result: string;
     }
   | {
       type: "document:visit-failed";
-      id: string;
+      tempId: string;
     };
 
 export type DeepResearchParameters = {
@@ -38,7 +35,7 @@ export type DeepResearchParameters = {
 
 export async function* deepResearch(
   params: DeepResearchParameters
-): AsyncGenerator<DeepResearchStep, { type: "research:finised" }, void> {
+): AsyncGenerator<DeepResearchStep, void, void> {
   const serpQueries = await generateSerpQueries({
     query: params.query,
     learnings: params.learnings || [],
@@ -48,26 +45,28 @@ export async function* deepResearch(
     ...query,
     id: v4(),
   }));
+
   for (const query of queriesWithId) {
     yield {
       type: "document:query",
       breadth: params.breadth,
       depth: params.depth,
       goal: query.researchGoal,
-      id: query.id,
+      tempId: query.id,
       query: query.query,
     };
   }
   const results = await searchBasedOnQueries(queriesWithId);
+
   for (const result of results) {
     if (result.fail) {
       yield {
         type: "document:visit-failed",
-        id: result.id,
+        tempId: result.tempId,
       };
     } else {
       yield {
-        id: result.id,
+        tempId: result.tempId,
         type: "document:visit",
         result: result.results.at(0)?.markdown || "",
         url: result.results.at(0)?.url || "",
@@ -79,7 +78,7 @@ export async function* deepResearch(
   const newDepth = params.depth - 1;
 
   if (newDepth <= 0) {
-    return { type: "research:finised" };
+    return;
   }
 
   const newLearnings = await processSerpResults(
@@ -87,6 +86,7 @@ export async function* deepResearch(
     3,
     newBreadth
   );
+
   for (const learnings of newLearnings) {
     yield* deepResearch({
       breadth: newBreadth,
@@ -96,8 +96,10 @@ export async function* deepResearch(
         placeholder: "",
       })),
       learnings: learnings.result.learnings,
-      query: learnings.query,
+      query: nextQuery({
+        researchGoal: learnings.goal,
+        followUpQuestions: learnings.result.followUpQuestions,
+      }),
     });
   }
-  return { type: "research:finised" };
 }

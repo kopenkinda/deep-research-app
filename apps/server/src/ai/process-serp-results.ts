@@ -6,6 +6,7 @@ import { systemPrompt } from "./prompts/system-prompt";
 import { openaiModel } from "./provider";
 import type { SERPQuerySuccessSearchResult } from "./search-serp-query";
 import { trimPrompt } from "./utils/trim";
+import { limitCalls } from "../utils/limit-concurrent-calls";
 
 export async function processSerpResults(
   results: SERPQuerySuccessSearchResult[],
@@ -14,32 +15,39 @@ export async function processSerpResults(
 ) {
   return await Promise.all(
     results.map((result) =>
-      processSerpResult({
-        query: result.query,
-        result: {
-          success: true,
-          data: result.results,
-        },
-        numLearnings,
-        numFollowUpQuestions,
-      })
+      limitCalls(() =>
+        processSerpResult({
+          query: result.query,
+          goal: result.goal,
+          result: {
+            success: true,
+            data: result.results,
+          },
+          numLearnings,
+          numFollowUpQuestions,
+        })
+      )
     )
   );
 }
 
 export async function processSerpResult({
   query,
+  goal,
   result,
   numLearnings = 3,
   numFollowUpQuestions = 3,
 }: {
   query: string;
+  goal: string;
   result: SearchResponse;
   numLearnings?: number;
   numFollowUpQuestions?: number;
 }) {
-  const contents = compact(result.data.map((item) => item.markdown)).map(
-    (content) => trimPrompt(content, 25_000)
+  const contents = await Promise.all(
+    compact(result.data.map((item) => item.markdown)).map((content) =>
+      trimPrompt(content, 25_000)
+    )
   );
 
   const res = await generateObject({
@@ -61,5 +69,5 @@ export async function processSerpResult({
     }),
   });
 
-  return { result: res.object, query };
+  return { result: res.object, query, goal };
 }

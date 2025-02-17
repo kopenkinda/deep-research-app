@@ -12,7 +12,7 @@ export const chatRouter = router({
   initialize: publicProcedure
     .input(
       z.object({
-        topic: z.string().nonempty().endsWith("?"),
+        topic: z.string().nonempty(),
         breadth: z.number().int().positive().min(1).max(10).optional(),
         depth: z.number().int().positive().min(1).max(10).optional(),
       })
@@ -67,7 +67,13 @@ export const chatRouter = router({
       return followups;
     }),
   setFollowupAnswer: publicProcedure
-    .input(z.object({ id: z.number().int(), answer: z.string().nonempty() }))
+    .input(
+      z.object({
+        id: z.number().int(),
+        answer: z.string().nonempty(),
+        chatId: z.number().int(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       const { db, schemas } = ctx;
       await db
@@ -77,7 +83,7 @@ export const chatRouter = router({
       const followups = await getFollowups(input.id);
       const allAnswered = followups.every((f) => f.answer !== null);
       if (allAnswered) {
-        await updateChat(input.id, { state: "awaiting-research" });
+        await updateChat(input.chatId, { state: "awaiting-research" });
       }
     }),
   deleteChat: publicProcedure

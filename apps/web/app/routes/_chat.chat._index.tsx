@@ -1,13 +1,19 @@
+import { getHotkeyHandler } from "@mantine/hooks";
 import { useForm } from "@tanstack/react-form";
 import { ArrowUpIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Slider } from "~/components/ui/slider";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 import { trpc } from "~/trpc/react";
 
 const validation = z.object({
-  topic: z.string().nonempty().endsWith("?"),
+  topic: z.string().min(3),
   breadth: z.number().int().positive().min(1).max(10),
   depth: z.number().int().positive().min(1).max(10),
 });
@@ -30,7 +36,6 @@ export default function NewChatPage() {
       onSubmit: validation,
     },
     async onSubmit({ value }) {
-      console.log("Submit:", value);
       const res = await mutation.mutateAsync(value);
       await utils.chat.getAllChatMetas.invalidate();
       await navigate(`/chat/${res.id}`);
@@ -55,6 +60,16 @@ export default function NewChatPage() {
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
+              onKeyDown={getHotkeyHandler([
+                [
+                  "mod+Enter",
+                  () => {
+                    if (form.state.canSubmit) {
+                      void form.handleSubmit();
+                    }
+                  },
+                ],
+              ])}
               placeholder="What do you want to research?"
               className="w-full min-h-[80px] resize-none bg-transparent p-3 placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             />
@@ -104,14 +119,21 @@ export default function NewChatPage() {
               selector={(state) => [state.canSubmit, state.isSubmitting]}
             >
               {([canSubmit, isSubmitting]) => (
-                <Button
-                  size="icon-sm"
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting}
-                >
-                  <ArrowUpIcon className="h-4 w-4" />
-                  <span className="sr-only">Start research</span>
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon-sm"
+                      type="submit"
+                      disabled={!canSubmit || isSubmitting}
+                    >
+                      <ArrowUpIcon className="h-4 w-4" />
+                      <span className="sr-only">Start research</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="text-sm">Or use ⌘+Enter</div>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </form.Subscribe>
           </div>

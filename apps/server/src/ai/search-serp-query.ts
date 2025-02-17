@@ -1,63 +1,47 @@
 import type { FirecrawlDocument } from "@mendable/firecrawl-js";
-import { firecrawlClient } from "./firecrawl-client";
+import { firecrawlSearch } from "./firecrawl-client";
 
 export type SERPQuerySuccessSearchResult = {
   fail: false;
   results: FirecrawlDocument[];
-  id: string;
+  tempId: string;
   query: string;
+  goal: string;
 };
 
 export type SERPQueryFailSearchResult = {
   fail: true;
-  id: string;
+  tempId: string;
 };
-
-let limit = 6;
 
 export async function searchBasedOnQueries(
   queries: Array<{ query: string; researchGoal: string; id: string }>
 ): Promise<Array<SERPQuerySuccessSearchResult | SERPQueryFailSearchResult>> {
   const promises = queries.map(async (query) => {
     try {
-      const searchResult = await firecrawlClient.search(query.query, {
+      const searchResult = await firecrawlSearch(query.query, {
         timeout: 15000,
         limit: 5,
         scrapeOptions: { formats: ["markdown"] },
       });
 
-      if (limit === 0) {
-        await new Promise((res) => {
-          const iv = setInterval(() => {
-            if (limit > 0) {
-              clearInterval(iv);
-              res(null);
-            }
-          }, 1000);
-        });
-      }
-
-      limit--;
-      setTimeout(() => {
-        limit++;
-      }, 60_000);
-
       if (!searchResult.success) {
         return {
-          id: query.id,
+          tempId: query.id,
           fail: true,
         } as const;
       }
 
       return {
-        id: query.id,
+        tempId: query.id,
         query: query.query,
         fail: false,
+        goal: query.researchGoal,
         results: searchResult.data,
       } as const;
     } catch (e) {
       return {
-        id: query.id,
+        tempId: query.id,
         fail: true,
       } as const;
     }
